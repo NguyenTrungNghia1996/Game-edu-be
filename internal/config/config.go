@@ -92,10 +92,7 @@ func Load() (*Config, error) {
 		S3SecretAccessKey: firstNonEmpty(getEnv("S3_SECRET_ACCESS_KEY", ""), getEnv("R2_SECRET_ACCESS_KEY", "")),
 		S3PublicBaseURL:   strings.TrimRight(firstNonEmpty(getEnv("S3_PUBLIC_BASE_URL", ""), getEnv("R2_PUBLIC_URL", "")), "/"),
 
-		CORSAllowedOrigins: getEnv(
-			"CORS_ALLOWED_ORIGINS",
-			"capacitor://localhost,https://localhost,http://localhost:3000",
-		),
+		CORSAllowedOrigins: getEnv("CORS_ALLOWED_ORIGINS", "*"),
 	}
 
 	if err := cfg.Validate(); err != nil {

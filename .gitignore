@@ -1,6 +1,7 @@
 .env
 bin/
 tmp/
+data/
 *.exe
 *.out
 *.test
