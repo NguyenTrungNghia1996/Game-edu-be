@@ -1,0 +1,29 @@
+APP_ENV=development
+APP_PORT=8080
+AUTO_MIGRATE=true
+JWT_SECRET=thay_bang_chuoi_bi_mat_toi_thieu_32_ky_tu
+JWT_EXPIRE_HOURS=168
+JWT_REFRESH_EXPIRE_HOURS=720
+
+# PostgreSQL
+DB_HOST=103.47.224.231
+DB_PORT=5432
+DB_USER=edugame
+DB_PASSWORD=StrongDbPassword123!
+DB_NAME=edugame_db
+DB_SSLMODE=disable
+
+# Redis
+REDIS_ADDR=103.47.224.231:6379
+REDIS_PASSWORD=StrongRedisPassword123!
+REDIS_DB=0
+
+# Cloudflare R2
+R2_ACCOUNT_ID=7a6d96c6ce0de09cb0cff71c5e0022a5
+R2_ACCESS_KEY_ID=6bfb3372f521c56778b14d42305b168a9ef974a9062493554ad7d83fb4c9d093
+R2_SECRET_ACCESS_KEY=your_secret_key
+R2_BUCKET_NAME=edugame-assets
+R2_PUBLIC_URL=https://assets.yourdomain.com
+
+# CORS (Bắt buộc có capacitor://localhost cho iOS và https://localhost cho Android)
+CORS_ALLOWED_ORIGINS=https://game.yourdomain.com,https://admin.yourdomain.com,capacitor://localhost,https://localhost,http://localhost:3000

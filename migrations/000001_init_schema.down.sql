@@ -1,0 +1,8 @@
+DROP TABLE IF EXISTS profile_inventory;
+DROP TABLE IF EXISTS profile_progress;
+DROP TABLE IF EXISTS challenges;
+DROP TABLE IF EXISTS stages;
+DROP TABLE IF EXISTS worlds;
+DROP TABLE IF EXISTS items;
+DROP TABLE IF EXISTS profiles;
+DROP TABLE IF EXISTS users;

@@ -1,0 +1,8 @@
+.env
+bin/
+tmp/
+*.exe
+*.out
+*.test
+coverage.out
+build-errors.log
