@@ -4,13 +4,13 @@ services:
     container_name: edugame-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: edugame
+      POSTGRES_PASSWORD: StrongDbPassword123!
+      POSTGRES_DB: edugame_db
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U edugame -d edugame_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -19,28 +19,62 @@ services:
     image: redis:7-alpine
     container_name: edugame-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    command: redis-server --appendonly yes --requirepass StrongRedisPassword123!
     volumes:
-      - redis_data:/data
+      - ./data/redis:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: ["CMD", "redis-cli", "-a", "StrongRedisPassword123!", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   api:
-    build: .
-    container_name: edugame-api
+    image: trungnghia1996/game-edu-be:latest
+    container_name: game-edu-be
     restart: unless-stopped
-    env_file: .env
     ports:
-      - "127.0.0.1:8080:8080"
+      - "8080:8080"
+    environment:
+      APP_ENV: production
+      APP_PORT: 8080
+      AUTO_MIGRATE: "true"
+      JWT_SECRET: thay_bang_chuoi_bi_mat_toi_thieu_32_ky_tu
+      JWT_EXPIRE_HOURS: 168
+      JWT_REFRESH_EXPIRE_HOURS: 720
+
+      # PostgreSQL (Docker service)
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: edugame
+      DB_PASSWORD: StrongDbPassword123!
+      DB_NAME: edugame_db
+      DB_SSLMODE: disable
+
+      # Redis (Docker service)
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: StrongRedisPassword123!
+      REDIS_DB: 0
+
+      # Object Storage (Cloudflare R2)
+      S3_PROVIDER: R2
+      S3_ENDPOINT: https://92fcbfff4e3eeadbc141f4efc33ac6fd.r2.cloudflarestorage.com
+      S3_REGION: auto
+      S3_BUCKET: image
+      S3_ACCESS_KEY_ID: your_s3_access_key_id
+      S3_SECRET_ACCESS_KEY: your_s3_secret_access_key
+      S3_PUBLIC_BASE_URL: https://cdn.nghia196.qzz.io
+
+      # CORS ("*" cho phép mọi domain; khi production có thể giới hạn danh sách domain)
+      CORS_ALLOWED_ORIGINS: "*"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-
-volumes:
-  pg_data:
-  redis_data:
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
