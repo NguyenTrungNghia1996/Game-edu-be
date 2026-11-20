@@ -45,6 +45,13 @@ func main() {
 	}
 	defer func() { _ = redisClient.Close() }()
 
+	if cfg.AutoSeed {
+		if err := database.Seed(db, redisClient, cfg.S3PublicBaseURL); err != nil {
+			log.Fatalf("failed to auto-seed database: %v", err)
+		}
+		log.Println("database auto-seed completed")
+	}
+
 	r2Storage, err := storage.NewR2Storage(
 		cfg.S3Endpoint,
 		cfg.S3Region,

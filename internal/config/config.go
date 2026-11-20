@@ -13,6 +13,7 @@ type Config struct {
 	AppEnv                string
 	AppPort               string
 	AutoMigrate           bool
+	AutoSeed              bool
 	MigrationsDir         string
 	JWTSecret             string
 	JWTExpireHours        int
@@ -66,6 +67,7 @@ func Load() (*Config, error) {
 		AppEnv:                getEnv("APP_ENV", "development"),
 		AppPort:               getEnv("APP_PORT", "8080"),
 		AutoMigrate:           getEnvBool("AUTO_MIGRATE", true),
+		AutoSeed:              getEnvBool("AUTO_SEED", true),
 		MigrationsDir:         getEnv("MIGRATIONS_DIR", "migrations"),
 		JWTSecret:             os.Getenv("JWT_SECRET"),
 		JWTExpireHours:        getEnvInt("JWT_EXPIRE_HOURS", 168),
