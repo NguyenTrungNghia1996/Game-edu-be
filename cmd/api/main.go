@@ -105,7 +105,7 @@ func main() {
 	authGroup.Post("/refresh", authHandler.Refresh)
 
 	// Protected routes (JWT required)
-	protected := api.Group("", middleware.RequireAuth(cfg.JWTSecret))
+	protected := api.Group("", middleware.RequireAuth(cfg.JWTSecret, authRepo))
 
 	// Profiles
 	protected.Get("/profiles", profileHandler.List)

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"edu-game-be/internal/domain"
+	"edu-game-be/internal/repository"
 	"edu-game-be/internal/service"
 
 	"github.com/gofiber/fiber/v2"
@@ -16,7 +17,7 @@ const (
 	LocalProfileID = "profile_id"
 )
 
-func RequireAuth(jwtSecret string) fiber.Handler {
+func RequireAuth(jwtSecret string, authRepo *repository.AuthRepository) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := strings.TrimSpace(c.Get("Authorization"))
 		if authHeader == "" {
@@ -46,8 +47,24 @@ func RequireAuth(jwtSecret string) fiber.Handler {
 			})
 		}
 
+		if authRepo != nil {
+			user, err := authRepo.FindUserByID(c.UserContext(), userID)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": "failed to verify user session",
+				})
+			}
+			if user == nil {
+				return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+					"error": "user no longer exists, please login again",
+				})
+			}
+			c.Locals(LocalUserRole, user.Role)
+		} else {
+			c.Locals(LocalUserRole, claims.Role)
+		}
+
 		c.Locals(LocalUserID, userID)
-		c.Locals(LocalUserRole, claims.Role)
 		return c.Next()
 	}
 }
