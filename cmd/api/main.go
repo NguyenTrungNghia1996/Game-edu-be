@@ -111,24 +111,30 @@ func main() {
 	authGroup.Post("/login", authHandler.Login)
 	authGroup.Post("/refresh", authHandler.Refresh)
 
-	// Protected routes (JWT required)
-	protected := api.Group("", middleware.RequireAuth(cfg.JWTSecret, authRepo))
+	requireAuth := middleware.RequireAuth(cfg.JWTSecret, authRepo)
+	requireProfile := middleware.RequireProfile(authRepo)
+	requireAdmin := middleware.RequireAdmin()
 
-	// Profiles
-	protected.Get("/profiles", profileHandler.List)
-	protected.Post("/profiles", profileHandler.Create)
+	// Profiles (JWT required)
+	profilesGroup := api.Group("/profiles", requireAuth)
+	profilesGroup.Get("", profileHandler.List)
+	profilesGroup.Post("", profileHandler.Create)
 
 	// Gameplay & Inventory (JWT + X-Profile-ID required)
-	withProfile := protected.Group("", middleware.RequireProfile(authRepo))
-	withProfile.Get("/worlds", gameplayHandler.ListWorlds)
-	withProfile.Get("/worlds/:worldId/map", gameplayHandler.GetWorldMap)
-	withProfile.Post("/stages/:stageId/start", gameplayHandler.StartStage)
-	withProfile.Post("/stages/:stageId/submit", gameplayHandler.SubmitAnswer)
-	withProfile.Get("/inventory", inventoryHandler.List)
-	withProfile.Patch("/inventory/:itemId/equip", inventoryHandler.Equip)
+	worldsGroup := api.Group("/worlds", requireAuth, requireProfile)
+	worldsGroup.Get("", gameplayHandler.ListWorlds)
+	worldsGroup.Get("/:worldId/map", gameplayHandler.GetWorldMap)
 
-	// Admin CMS routes (JWT + role == admin)
-	adminGroup := protected.Group("/admin", middleware.RequireAdmin())
+	stagesGroup := api.Group("/stages", requireAuth, requireProfile)
+	stagesGroup.Post("/:stageId/start", gameplayHandler.StartStage)
+	stagesGroup.Post("/:stageId/submit", gameplayHandler.SubmitAnswer)
+
+	inventoryGroup := api.Group("/inventory", requireAuth, requireProfile)
+	inventoryGroup.Get("", inventoryHandler.List)
+	inventoryGroup.Patch("/:itemId/equip", inventoryHandler.Equip)
+
+	// Admin CMS routes (JWT + role == admin; does NOT run RequireProfile)
+	adminGroup := api.Group("/admin", requireAuth, requireAdmin)
 	adminGroup.Post("/upload-url", adminHandler.GenerateUploadURL)
 
 	adminGroup.Get("/worlds", adminHandler.ListWorlds)
